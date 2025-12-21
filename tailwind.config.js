@@ -4,6 +4,9 @@ export default {
   theme: {
     extend: {
       colors: {
+        hava: {
+          yellow: '#f7cb0a',
+        },
         ramen: {
           red: '#D7263D',
           dark: '#0B0A0A',
@@ -17,6 +20,7 @@ export default {
         }
       },
       fontFamily: {
+        'more-sugar': ['"More Sugar"', 'sans-serif'],
         'pretendard': ['Pretendard', 'system-ui', 'sans-serif'],
         'noto-kr': ['Noto Serif KR', 'serif']
       },

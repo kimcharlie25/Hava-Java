@@ -9,11 +9,11 @@ interface MenuItemCardProps {
   onUpdateQuantity: (id: string, quantity: number) => void;
 }
 
-const MenuItemCard: React.FC<MenuItemCardProps> = ({ 
-  item, 
-  onAddToCart, 
-  quantity, 
-  onUpdateQuantity 
+const MenuItemCard: React.FC<MenuItemCardProps> = ({
+  item,
+  onAddToCart,
+  quantity,
+  onUpdateQuantity
 }) => {
   const [showCustomization, setShowCustomization] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState<Variation | undefined>(
@@ -43,7 +43,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 
   const handleCustomizedAddToCart = () => {
     // Convert selectedAddOns back to regular AddOn array for cart
-    const addOnsForCart: AddOn[] = selectedAddOns.flatMap(addOn => 
+    const addOnsForCart: AddOn[] = selectedAddOns.flatMap(addOn =>
       Array(addOn.quantity).fill({ ...addOn, quantity: undefined })
     );
     onAddToCart(item, 1, selectedVariation, addOnsForCart);
@@ -64,12 +64,12 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
   const updateAddOnQuantity = (addOn: AddOn, quantity: number) => {
     setSelectedAddOns(prev => {
       const existingIndex = prev.findIndex(a => a.id === addOn.id);
-      
+
       if (quantity === 0) {
         // Remove add-on if quantity is 0
         return prev.filter(a => a.id !== addOn.id);
       }
-      
+
       if (existingIndex >= 0) {
         // Update existing add-on quantity
         const updated = [...prev];
@@ -95,7 +95,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
     <>
       <div className={`bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group animate-scale-in border border-gray-100 ${!item.available ? 'opacity-60' : ''}`}>
         {/* Image Container with Badges */}
-        <div className="relative h-48 bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="relative aspect-[3/4] bg-gradient-to-br from-gray-50 to-gray-100">
           {item.image ? (
             <img
               src={item.image}
@@ -112,7 +112,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
           <div className={`absolute inset-0 flex items-center justify-center ${item.image ? 'hidden' : ''}`}>
             <div className="text-6xl opacity-20 text-gray-400">☕</div>
           </div>
-          
+
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-2">
             {item.isOnDiscount && item.discountPrice && (
@@ -126,13 +126,13 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
               </div>
             )}
           </div>
-          
+
           {!item.available && (
             <div className="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
               UNAVAILABLE
             </div>
           )}
-          
+
           {/* Discount Percentage Badge */}
           {item.isOnDiscount && item.discountPrice && (
             <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm text-red-600 text-xs font-bold px-2 py-1 rounded-full shadow-lg">
@@ -140,7 +140,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
             </div>
           )}
         </div>
-        
+
         {/* Content */}
         <div className="p-5">
           <div className="flex items-start justify-between mb-3">
@@ -151,11 +151,11 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
               </div>
             )}
           </div>
-          
+
           <p className={`text-sm mb-4 leading-relaxed ${!item.available ? 'text-gray-400' : 'text-gray-600'}`}>
             {!item.available ? 'Currently Unavailable' : item.description}
           </p>
-          
+
           {/* Pricing Section */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex-1">
@@ -178,14 +178,14 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
                   ₱{item.basePrice.toFixed(2)}
                 </div>
               )}
-              
+
               {item.variations && item.variations.length > 0 && (
                 <div className="text-xs text-gray-500 mt-1">
                   Starting price
                 </div>
               )}
             </div>
-            
+
             {/* Action Buttons */}
             <div className="flex-shrink-0">
               {!item.available ? (
@@ -198,7 +198,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
               ) : quantity === 0 ? (
                 <button
                   onClick={handleAddToCart}
-                  className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2.5 rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 transform hover:scale-105 font-medium text-sm shadow-lg hover:shadow-xl"
+                  className="bg-hava-yellow text-black px-6 py-2.5 rounded-xl hover:bg-yellow-400 transition-all duration-200 transform hover:scale-105 font-medium text-sm shadow-lg hover:shadow-xl"
                 >
                   {item.variations?.length || item.addOns?.length ? 'Customize' : 'Add to Cart'}
                 </button>
@@ -258,11 +258,10 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
                     {item.variations.map((variation) => (
                       <label
                         key={variation.id}
-                        className={`flex items-center justify-between p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
-                          selectedVariation?.id === variation.id
-                            ? 'border-red-500 bg-red-50'
+                        className={`flex items-center justify-between p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${selectedVariation?.id === variation.id
+                            ? 'border-hava-yellow bg-yellow-50'
                             : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center space-x-3">
                           <input
@@ -304,7 +303,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
                                 {addOn.price > 0 ? `₱${addOn.price.toFixed(2)} each` : 'Free'}
                               </div>
                             </div>
-                            
+
                             <div className="flex items-center space-x-2">
                               {selectedAddOns.find(a => a.id === addOn.id) ? (
                                 <div className="flex items-center space-x-2 bg-red-100 rounded-xl p-1 border border-red-200">
@@ -336,7 +335,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
                                 <button
                                   type="button"
                                   onClick={() => updateAddOnQuantity(addOn, 1)}
-                                  className="flex items-center space-x-1 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 text-sm font-medium shadow-lg"
+                                  className="flex items-center space-x-1 px-4 py-2 bg-hava-yellow text-black rounded-xl hover:bg-yellow-400 transition-all duration-200 text-sm font-medium shadow-lg"
                                 >
                                   <Plus className="h-3 w-3" />
                                   <span>Add</span>
@@ -361,7 +360,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 
               <button
                 onClick={handleCustomizedAddToCart}
-                className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-4 rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 font-semibold flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="w-full bg-hava-yellow text-black py-4 rounded-xl hover:bg-yellow-400 transition-all duration-200 font-semibold flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 <ShoppingCart className="h-5 w-5" />
                 <span>Add to Cart - ₱{calculatePrice().toFixed(2)}</span>

@@ -3,6 +3,12 @@
 @tailwind utilities;
 
 /* Ramen Yard Custom Styles */
+@font-face {
+  font-family: 'More Sugar';
+  src: url('/font/MoreSugar-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
 /* Minimal helpers for ramen palette when needed outside tailwind tokens */
 .bg-ramen-cream { background-color: #FFF3E0; }
 .bg-ramen-beige { background-color: #F7E7CE; }
