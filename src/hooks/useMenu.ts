@@ -10,16 +10,33 @@ export const useMenu = () => {
   const fetchMenuItems = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch menu items with their variations and add-ons
-      const { data: items, error: itemsError } = await supabase
+      // Try sorting by sort_order first
+      let { data: items, error: itemsError } = await supabase
         .from('menu_items')
         .select(`
           *,
           variations (*),
           add_ons (*)
         `)
-        .order('created_at', { ascending: true });
+        .order('sort_order', { ascending: true });
+
+      // Fallback: If sort_order fails (column might not exist), try sorting by created_at
+      if (itemsError) {
+        console.warn('Failed to sort by sort_order, falling back to created_at. Please ensure sort_order column exists in DB.');
+        const { data: fallbackItems, error: fallbackError } = await supabase
+          .from('menu_items')
+          .select(`
+            *,
+            variations (*),
+            add_ons (*)
+          `)
+          .order('created_at', { ascending: true });
+
+        items = fallbackItems;
+        itemsError = fallbackError;
+      }
 
       if (itemsError) throw itemsError;
 
@@ -28,11 +45,11 @@ export const useMenu = () => {
         const now = new Date();
         const discountStart = item.discount_start_date ? new Date(item.discount_start_date) : null;
         const discountEnd = item.discount_end_date ? new Date(item.discount_end_date) : null;
-        
-        const isDiscountActive = item.discount_active && 
-          (!discountStart || now >= discountStart) && 
+
+        const isDiscountActive = item.discount_active &&
+          (!discountStart || now >= discountStart) &&
           (!discountEnd || now <= discountEnd);
-        
+
         // Calculate effective price
         const effectivePrice = isDiscountActive && item.discount_price ? item.discount_price : item.base_price;
 
@@ -44,6 +61,7 @@ export const useMenu = () => {
           category: item.category,
           popular: item.popular,
           available: item.available ?? true,
+          sortOrder: item.sort_order, // This might be undefined in fallback
           image: item.image_url || undefined,
           discountPrice: item.discount_price || undefined,
           discountStartDate: item.discount_start_date || undefined,
@@ -51,12 +69,12 @@ export const useMenu = () => {
           discountActive: item.discount_active || false,
           effectivePrice,
           isOnDiscount: isDiscountActive,
-          variations: item.variations?.map(v => ({
+          variations: item.variations?.map((v: any) => ({
             id: v.id,
             name: v.name,
             price: v.price
           })) || [],
-          addOns: item.add_ons?.map(a => ({
+          addOns: item.add_ons?.map((a: any) => ({
             id: a.id,
             name: a.name,
             price: a.price,
@@ -85,6 +103,7 @@ export const useMenu = () => {
           description: item.description,
           base_price: item.basePrice,
           category: item.category,
+          sort_order: item.sortOrder || 0,
           popular: item.popular || false,
           available: item.available ?? true,
           image_url: item.image || null,
@@ -217,6 +236,23 @@ export const useMenu = () => {
     }
   };
 
+  const updateSortOrder = async (id: string, newOrder: number) => {
+    try {
+      const { error } = await supabase
+        .from('menu_items')
+        .update({ sort_order: newOrder })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Optimistic update or just refetch
+      await fetchMenuItems();
+    } catch (err) {
+      console.error('Error updating sort order:', err);
+      throw err;
+    }
+  };
+
   useEffect(() => {
     fetchMenuItems();
   }, []);
@@ -228,6 +264,7 @@ export const useMenu = () => {
     addMenuItem,
     updateMenuItem,
     deleteMenuItem,
+    updateSortOrder,
     refetch: fetchMenuItems
   };
 };

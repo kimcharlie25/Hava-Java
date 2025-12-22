@@ -25,19 +25,20 @@ const Header: React.FC<HeaderProps> = ({ cartItemsCount, onCartClick, onMenuClic
               <img
                 src={siteSettings?.site_logo || "/logo.jpg"}
                 alt={siteSettings?.site_name || "Hava Java"}
-                className="w-10 h-10 rounded object-cover ring-2 ring-white"
+                className="h-12 w-auto aspect-[5/2] object-contain rounded"
                 onError={(e) => {
                   e.currentTarget.src = "/logo.jpg";
                 }}
               />
             )}
-            <h1 className="text-2xl font-more-sugar font-semibold">
+            {/* Business Name hidden as per requirement */}
+            {/* <h1 className="text-2xl font-more-sugar font-semibold">
               {loading ? (
                 <div className="w-24 h-6 bg-gray-200 rounded animate-pulse" />
               ) : (
                 "Hava Java"
               )}
-            </h1>
+            </h1> */}
           </button>
 
           <div className="flex items-center space-x-2">

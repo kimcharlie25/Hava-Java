@@ -21,6 +21,7 @@ export interface MenuItem {
   image?: string;
   popular?: boolean;
   available?: boolean;
+  sortOrder?: number;
   variations?: Variation[];
   addOns?: AddOn[];
   // Discount pricing fields

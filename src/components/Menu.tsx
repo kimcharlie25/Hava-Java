@@ -87,15 +87,16 @@ const Menu: React.FC<MenuProps> = ({ menuItems, addToCart, cartItems, updateQuan
 
   return (
     <>
-      <MobileNav
+      {/* Mobile Navigation hidden as per requirement */}
+      {/* <MobileNav
         activeCategory={activeCategory}
         onCategoryClick={handleCategoryClick}
-      />
+      /> */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-more-sugar font-semibold text-black mb-4">Our Menu</h2>
+          <h2 className="text-4xl font-more-sugar font-semibold text-black mb-4">People's favorite Graham Cake</h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Have a break, Hava Java
+            Thank you for making us part of your sweet moments. <br />FREE Insulated Bag when you order 2 or more items.
           </p>
         </div>
 

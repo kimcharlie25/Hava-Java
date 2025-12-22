@@ -15,7 +15,7 @@ const AdminDashboard: React.FC = () => {
   });
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const { menuItems, loading, addMenuItem, updateMenuItem, deleteMenuItem } = useMenu();
+  const { menuItems, loading, addMenuItem, updateMenuItem, deleteMenuItem, updateSortOrder } = useMenu();
   const { categories } = useCategories();
   const [currentView, setCurrentView] = useState<'dashboard' | 'items' | 'add' | 'edit' | 'categories' | 'payments' | 'settings'>('dashboard');
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
@@ -707,6 +707,7 @@ const AdminDashboard: React.FC = () => {
                     <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">
                       Select
                     </th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Order</th>
                     <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Name</th>
                     <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Category</th>
                     <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Price</th>
@@ -725,6 +726,24 @@ const AdminDashboard: React.FC = () => {
                           checked={selectedItems.includes(item.id)}
                           onChange={() => handleSelectItem(item.id)}
                           className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                      </td>
+                      <td className="px-6 py-4">
+                        <input
+                          type="number"
+                          defaultValue={item.sortOrder || 0}
+                          onBlur={(e) => {
+                            const val = parseInt(e.target.value);
+                            if (!isNaN(val) && val !== item.sortOrder) {
+                              updateSortOrder(item.id, val);
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.currentTarget.blur();
+                            }
+                          }}
+                          className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm focus:ring-green-500 focus:border-green-500"
                         />
                       </td>
                       <td className="px-6 py-4">

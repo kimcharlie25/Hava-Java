@@ -67,12 +67,13 @@ function MainApp() {
         />
       )}
 
-      {currentView === 'menu' && (
+      {/* Floating Cart Button hidden as per requirement */}
+      {/* {currentView === 'menu' && (
         <FloatingCartButton
           itemCount={cart.getTotalItems()}
           onCartClick={() => handleViewChange('cart')}
         />
-      )}
+      )} */}
     </div>
   );
 }

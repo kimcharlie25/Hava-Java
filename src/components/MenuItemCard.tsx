@@ -20,6 +20,14 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
     item.variations?.[0]
   );
   const [selectedAddOns, setSelectedAddOns] = useState<(AddOn & { quantity: number })[]>([]);
+  const [modalQuantity, setModalQuantity] = useState(1);
+
+  // Reset quantity when modal opens
+  React.useEffect(() => {
+    if (showCustomization) {
+      setModalQuantity(1);
+    }
+  }, [showCustomization]);
 
   const calculatePrice = () => {
     // Use effective price (discounted or regular) as base
@@ -46,9 +54,10 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
     const addOnsForCart: AddOn[] = selectedAddOns.flatMap(addOn =>
       Array(addOn.quantity).fill({ ...addOn, quantity: undefined })
     );
-    onAddToCart(item, 1, selectedVariation, addOnsForCart);
+    onAddToCart(item, modalQuantity, selectedVariation, addOnsForCart);
     setShowCustomization(false);
     setSelectedAddOns([]);
+    setModalQuantity(1);
   };
 
   const handleIncrement = () => {
@@ -200,7 +209,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
                   onClick={handleAddToCart}
                   className="bg-hava-yellow text-black px-6 py-2.5 rounded-xl hover:bg-yellow-400 transition-all duration-200 transform hover:scale-105 font-medium text-sm shadow-lg hover:shadow-xl"
                 >
-                  {item.variations?.length || item.addOns?.length ? 'Customize' : 'Add to Cart'}
+                  {item.variations?.length || item.addOns?.length ? 'BUY NOW' : 'Add to Cart'}
                 </button>
               ) : (
                 <div className="flex items-center space-x-2 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-xl p-1 border border-yellow-200">
@@ -259,8 +268,8 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
                       <label
                         key={variation.id}
                         className={`flex items-center justify-between p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${selectedVariation?.id === variation.id
-                            ? 'border-hava-yellow bg-yellow-50'
-                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                          ? 'border-hava-yellow bg-yellow-50'
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                           }`}
                       >
                         <div className="flex items-center space-x-3">
@@ -350,11 +359,31 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
                 </div>
               )}
 
-              {/* Price Summary */}
+              {/* Price Summary & Quantity */}
               <div className="border-t border-gray-200 pt-4 mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-gray-900 font-medium">Quantity</span>
+                  <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-1 border border-gray-200">
+                    <button
+                      type="button"
+                      onClick={() => setModalQuantity(Math.max(1, modalQuantity - 1))}
+                      className="p-2 hover:bg-white rounded-md shadow-sm transition-all duration-200"
+                    >
+                      <Minus className="h-4 w-4 text-gray-600" />
+                    </button>
+                    <span className="font-bold text-gray-900 w-8 text-center">{modalQuantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => setModalQuantity(modalQuantity + 1)}
+                      className="p-2 hover:bg-white rounded-md shadow-sm transition-all duration-200"
+                    >
+                      <Plus className="h-4 w-4 text-gray-600" />
+                    </button>
+                  </div>
+                </div>
                 <div className="flex items-center justify-between text-2xl font-bold text-gray-900">
                   <span>Total:</span>
-                  <span className="text-red-600">₱{calculatePrice().toFixed(2)}</span>
+                  <span className="text-red-600">₱{(calculatePrice() * modalQuantity).toFixed(2)}</span>
                 </div>
               </div>
 
@@ -363,7 +392,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
                 className="w-full bg-hava-yellow text-black py-4 rounded-xl hover:bg-yellow-400 transition-all duration-200 font-semibold flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 <ShoppingCart className="h-5 w-5" />
-                <span>Add to Cart - ₱{calculatePrice().toFixed(2)}</span>
+                <span>Add to Cart - ₱{(calculatePrice() * modalQuantity).toFixed(2)}</span>
               </button>
             </div>
           </div>
