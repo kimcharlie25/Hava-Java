@@ -82,7 +82,7 @@ ${cartItems.map(item => {
 
 ${notes ? `📝 Notes: ${notes}` : ''}
 
-Please confirm this order to proceed. Thank you for choosing Hava Java!
+Kindly SEND this message to confirm your order. Thank you for choosing Hava Java!
     `.trim();
 
     const encodedMessage = encodeURIComponent(orderDetails);
