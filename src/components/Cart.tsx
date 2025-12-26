@@ -1,6 +1,7 @@
 import React from 'react';
 import { Trash2, Plus, Minus, ArrowLeft } from 'lucide-react';
 import { CartItem } from '../types';
+import { formatPrice } from '../utils/format';
 
 interface CartProps {
   cartItems: CartItem[];
@@ -76,7 +77,15 @@ const Cart: React.FC<CartProps> = ({
                     ).join(', ')}
                   </p>
                 )}
-                <p className="text-lg font-semibold text-black">₱{item.totalPrice} each</p>
+                {item.selectedPromoOptions && item.promotion && (
+                  <p className="text-sm text-gray-500 mb-1">
+                    Bundle: {Object.entries(item.selectedPromoOptions).map(([id, qty]) => {
+                      const optionName = item.promotion?.options.find(o => o.id === id)?.name || 'Unknown';
+                      return `${qty}x ${optionName}`;
+                    }).join(', ')}
+                  </p>
+                )}
+                <p className="text-lg font-semibold text-black">₱{formatPrice(item.totalPrice)} each</p>
               </div>
 
               <div className="flex items-center space-x-4 ml-4">
@@ -97,7 +106,7 @@ const Cart: React.FC<CartProps> = ({
                 </div>
 
                 <div className="text-right">
-                  <p className="text-lg font-semibold text-black">₱{item.totalPrice * item.quantity}</p>
+                  <p className="text-lg font-semibold text-black">₱{formatPrice(item.totalPrice * item.quantity)}</p>
                 </div>
 
                 <button
@@ -115,7 +124,7 @@ const Cart: React.FC<CartProps> = ({
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex items-center justify-between text-2xl font-noto font-semibold text-black mb-6">
           <span>Total:</span>
-          <span>₱{(getTotalPrice() || 0).toFixed(2)}</span>
+          <span>₱{formatPrice(getTotalPrice() || 0)}</span>
         </div>
 
         <button

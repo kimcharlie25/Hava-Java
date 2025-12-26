@@ -79,7 +79,8 @@ export const useMenu = () => {
             name: a.name,
             price: a.price,
             category: a.category
-          })) || []
+          })) || [],
+          promotion: item.promotion
         };
       }) || [];
 
@@ -110,7 +111,9 @@ export const useMenu = () => {
           discount_price: item.discountPrice || null,
           discount_start_date: item.discountStartDate || null,
           discount_end_date: item.discountEndDate || null,
-          discount_active: item.discountActive || false
+          discount_end_date: item.discountEndDate || null,
+          discount_active: item.discountActive || false,
+          promotion: item.promotion || null
         })
         .select()
         .single();
@@ -172,7 +175,9 @@ export const useMenu = () => {
           discount_price: updates.discountPrice || null,
           discount_start_date: updates.discountStartDate || null,
           discount_end_date: updates.discountEndDate || null,
-          discount_active: updates.discountActive
+          discount_end_date: updates.discountEndDate || null,
+          discount_active: updates.discountActive,
+          promotion: updates.promotion
         })
         .eq('id', id);
 

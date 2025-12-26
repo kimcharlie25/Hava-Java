@@ -1,6 +1,7 @@
 import React from 'react';
 import { MenuItem, CartItem } from '../types';
 import { useCategories } from '../hooks/useCategories';
+import { useToast } from '../context/ToastContext';
 import MenuItemCard from './MenuItemCard';
 import MobileNav from './MobileNav';
 
@@ -16,13 +17,14 @@ const preloadImages = (items: MenuItem[]) => {
 
 interface MenuProps {
   menuItems: MenuItem[];
-  addToCart: (item: MenuItem, quantity?: number, variation?: any, addOns?: any[]) => void;
+  addToCart: (item: MenuItem, quantity?: number, variation?: any, addOns?: any[], promoOptions?: Record<string, number>) => void;
   cartItems: CartItem[];
   updateQuantity: (id: string, quantity: number) => void;
 }
 
 const Menu: React.FC<MenuProps> = ({ menuItems, addToCart, cartItems, updateQuantity }) => {
   const { categories } = useCategories();
+  const { showToast } = useToast();
   const [activeCategory, setActiveCategory] = React.useState('hot-coffee');
 
   // Preload images when menu items change
@@ -84,6 +86,11 @@ const Menu: React.FC<MenuProps> = ({ menuItems, addToCart, cartItems, updateQuan
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleAddToCart = (item: MenuItem, quantity?: number, variation?: any, addOns?: any[], promoOptions?: Record<string, number>) => {
+    addToCart(item, quantity, variation, addOns, promoOptions);
+    showToast('Added to cart successfully');
+  };
+
 
   return (
     <>
@@ -96,7 +103,11 @@ const Menu: React.FC<MenuProps> = ({ menuItems, addToCart, cartItems, updateQuan
         <div className="text-center mb-12">
           <h2 className="text-4xl font-more-sugar font-semibold text-black mb-4">People's favorite Graham Cake</h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Thank you for making us part of your sweet moments. <br />FREE Insulated Bag when you order 2 or more items.
+            Thank you for making us part of your sweet moments.
+          </p>
+          <br />
+          <p className="font-more-sugar text-red-600 max-w-2xl mx-auto">
+            *FREE Insulated Bag when you order 2 or more items*
           </p>
         </div>
 
@@ -107,9 +118,9 @@ const Menu: React.FC<MenuProps> = ({ menuItems, addToCart, cartItems, updateQuan
 
           return (
             <section key={category.id} id={category.id} className="mb-16">
-              <div className="flex items-center mb-8">
+              <div className="flex items-center mb-8 flex-nowrap">
                 <span className="text-3xl mr-3">{category.icon}</span>
-                <h3 className="text-3xl font-more-sugar font-medium text-black">{category.name}</h3>
+                <h3 className="text-xl md:text-3xl font-more-sugar font-medium text-black whitespace-nowrap overflow-hidden text-ellipsis">{category.name}</h3>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -119,7 +130,7 @@ const Menu: React.FC<MenuProps> = ({ menuItems, addToCart, cartItems, updateQuan
                     <MenuItemCard
                       key={item.id}
                       item={item}
-                      onAddToCart={addToCart}
+                      onAddToCart={handleAddToCart}
                       quantity={cartItem?.quantity || 0}
                       onUpdateQuantity={updateQuantity}
                     />

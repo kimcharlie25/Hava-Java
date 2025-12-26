@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useCart } from './hooks/useCart';
+import { ToastProvider } from './context/ToastContext';
 import Header from './components/Header';
 import SubNav from './components/SubNav';
 import Menu from './components/Menu';
@@ -30,51 +31,53 @@ function MainApp() {
     : menuItems.filter(item => item.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-white font-inter">
-      <Header
-        cartItemsCount={cart.getTotalItems()}
-        onCartClick={() => handleViewChange('cart')}
-        onMenuClick={() => handleViewChange('menu')}
-      />
-      <SubNav selectedCategory={selectedCategory} onCategoryClick={handleCategoryClick} />
-
-      {currentView === 'menu' && (
-        <Menu
-          menuItems={filteredMenuItems}
-          addToCart={cart.addToCart}
-          cartItems={cart.cartItems}
-          updateQuantity={cart.updateQuantity}
+    <ToastProvider>
+      <div className="min-h-screen bg-white font-inter">
+        <Header
+          cartItemsCount={cart.getTotalItems()}
+          onCartClick={() => handleViewChange('cart')}
+          onMenuClick={() => handleViewChange('menu')}
         />
-      )}
+        <SubNav selectedCategory={selectedCategory} onCategoryClick={handleCategoryClick} />
 
-      {currentView === 'cart' && (
-        <Cart
-          cartItems={cart.cartItems}
-          updateQuantity={cart.updateQuantity}
-          removeFromCart={cart.removeFromCart}
-          clearCart={cart.clearCart}
-          getTotalPrice={cart.getTotalPrice}
-          onContinueShopping={() => handleViewChange('menu')}
-          onCheckout={() => handleViewChange('checkout')}
-        />
-      )}
+        {currentView === 'menu' && (
+          <Menu
+            menuItems={filteredMenuItems}
+            addToCart={cart.addToCart}
+            cartItems={cart.cartItems}
+            updateQuantity={cart.updateQuantity}
+          />
+        )}
 
-      {currentView === 'checkout' && (
-        <Checkout
-          cartItems={cart.cartItems}
-          totalPrice={cart.getTotalPrice()}
-          onBack={() => handleViewChange('cart')}
-        />
-      )}
+        {currentView === 'cart' && (
+          <Cart
+            cartItems={cart.cartItems}
+            updateQuantity={cart.updateQuantity}
+            removeFromCart={cart.removeFromCart}
+            clearCart={cart.clearCart}
+            getTotalPrice={cart.getTotalPrice}
+            onContinueShopping={() => handleViewChange('menu')}
+            onCheckout={() => handleViewChange('checkout')}
+          />
+        )}
 
-      {/* Floating Cart Button hidden as per requirement */}
-      {/* {currentView === 'menu' && (
+        {currentView === 'checkout' && (
+          <Checkout
+            cartItems={cart.cartItems}
+            totalPrice={cart.getTotalPrice()}
+            onBack={() => handleViewChange('cart')}
+          />
+        )}
+
+        {/* Floating Cart Button hidden as per requirement */}
+        {/* {currentView === 'menu' && (
         <FloatingCartButton
           itemCount={cart.getTotalItems()}
           onCartClick={() => handleViewChange('cart')}
         />
       )} */}
-    </div>
+      </div>
+    </ToastProvider>
   );
 }
 

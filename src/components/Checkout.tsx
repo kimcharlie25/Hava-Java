@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Calendar } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock } from 'lucide-react';
 import { CartItem, ServiceType } from '../types';
+import { formatPrice } from '../utils/format';
 
 interface CheckoutProps {
   cartItems: CartItem[];
@@ -17,11 +18,13 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, totalPrice, onBack }) =>
   const [serviceType, setServiceType] = useState<ServiceType>('delivery');
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedBranch, setSelectedBranch] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
   const [address, setAddress] = useState('');
   const [landmark, setLandmark] = useState('');
   const [notes, setNotes] = useState('');
 
   const branches = [
+    'Manila',
     'Quezon City',
     'Caloocan',
     'Pasig',
@@ -32,7 +35,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, totalPrice, onBack }) =>
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  // Set default payment method when payment methods are loaded
+  // Set default payment method when payment methods are loaded - ${serviceType === 'delivery' ? `🛵 DELIVERY FEE: Shipping fee varies based on Lalamove` : ''}
 
 
 
@@ -45,6 +48,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, totalPrice, onBack }) =>
 📞 Contact: ${contactNumber}
 📍 Service: ${serviceType.charAt(0).toUpperCase() + serviceType.slice(1)}
 📅 Date: ${selectedDate}
+⏰ Time: ${selectedTime}
 ${serviceType === 'delivery'
         ? `🏠 Address: ${address}${landmark ? `\n🗺️ Landmark: ${landmark}` : ''}`
         : `🏢 Branch: ${selectedBranch}`}
@@ -64,12 +68,17 @@ ${cartItems.map(item => {
                 : addOn.name
             ).join(', ')}`;
           }
-          itemDetails += ` x${item.quantity} - ₱${item.totalPrice * item.quantity}`;
+          if (item.selectedPromoOptions && item.promotion) {
+            itemDetails += ` [Bundle: ${Object.entries(item.selectedPromoOptions).map(([id, qty]) => {
+              const optionName = item.promotion?.options.find(o => o.id === id)?.name || 'Unknown';
+              return `${qty}x ${optionName}`;
+            }).join(', ')}]`;
+          }
+          itemDetails += ` x${item.quantity} - ₱${formatPrice(item.totalPrice * item.quantity)}`;
           return itemDetails;
         }).join('\n')}
 
-💰 TOTAL: ₱${totalPrice}
-${serviceType === 'delivery' ? `🛵 DELIVERY FEE: Shipping fee varies based on Lalamove` : ''}
+💰 TOTAL: ₱${formatPrice(totalPrice)}
 
 ${notes ? `📝 Notes: ${notes}` : ''}
 
@@ -89,7 +98,10 @@ Please confirm this order to proceed. Thank you for choosing Hava Java!
   const isDetailsValid =
     customerName &&
     contactNumber &&
+    customerName &&
+    contactNumber &&
     selectedDate &&
+    selectedTime &&
     (serviceType === 'delivery' ? (address) : (selectedBranch));
 
   return (
@@ -123,9 +135,17 @@ Please confirm this order to proceed. Thank you for choosing Hava Java!
                       Add-ons: {item.selectedAddOns.map(addOn => addOn.name).join(', ')}
                     </p>
                   )}
-                  <p className="text-sm text-gray-600">₱{item.totalPrice} x {item.quantity}</p>
+                  {item.selectedPromoOptions && item.promotion && (
+                    <p className="text-sm text-gray-600">
+                      Bundle: {Object.entries(item.selectedPromoOptions).map(([id, qty]) => {
+                        const optionName = item.promotion?.options.find(o => o.id === id)?.name || 'Unknown';
+                        return `${qty}x ${optionName}`;
+                      }).join(', ')}
+                    </p>
+                  )}
+                  <p className="text-sm text-gray-600">₱{formatPrice(item.totalPrice)} x {item.quantity}</p>
                 </div>
-                <span className="font-semibold text-black">₱{item.totalPrice * item.quantity}</span>
+                <span className="font-semibold text-black">₱{formatPrice(item.totalPrice * item.quantity)}</span>
               </div>
             ))}
           </div>
@@ -133,7 +153,7 @@ Please confirm this order to proceed. Thank you for choosing Hava Java!
           <div className="border-t border-red-200 pt-4">
             <div className="flex items-center justify-between text-2xl font-noto font-semibold text-black">
               <span>Total:</span>
-              <span>₱{totalPrice}</span>
+              <span>₱{formatPrice(totalPrice)}</span>
             </div>
           </div>
         </div>
@@ -210,6 +230,23 @@ Please confirm this order to proceed. Thank you for choosing Hava Java!
               </div>
             </div>
 
+            {/* Time Selection */}
+            <div>
+              <label className="block text-sm font-medium text-black mb-2">
+                {serviceType === 'delivery' ? 'Delivery Time' : 'Pickup Time'} *
+              </label>
+              <div className="relative">
+                <input
+                  type="time"
+                  value={selectedTime}
+                  onChange={(e) => setSelectedTime(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hava-yellow focus:border-transparent transition-all duration-200 outline-none"
+                  required
+                />
+                <Clock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 pointer-events-none" />
+              </div>
+            </div>
+
             {/* Delivery Address or Branch Selection */}
             {serviceType === 'delivery' ? (
               <>
@@ -226,7 +263,7 @@ Please confirm this order to proceed. Thank you for choosing Hava Java!
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-black mb-2">Landmark</label>
+                  <label className="block text-sm font-medium text-black mb-2">Landmark (optional)</label>
                   <input
                     type="text"
                     value={landmark}
@@ -262,7 +299,7 @@ Please confirm this order to proceed. Thank you for choosing Hava Java!
 
             {/* Special Notes */}
             <div>
-              <label className="block text-sm font-medium text-black mb-2">Special Instructions</label>
+              <label className="block text-sm font-medium text-black mb-2">Special Instructions (optional)</label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}

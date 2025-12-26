@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Plus, Minus, X, ShoppingCart } from 'lucide-react';
 import { MenuItem, Variation, AddOn } from '../types';
+import { formatPrice } from '../utils/format';
 
 interface MenuItemCardProps {
   item: MenuItem;
-  onAddToCart: (item: MenuItem, quantity?: number, variation?: Variation, addOns?: AddOn[]) => void;
+  onAddToCart: (item: MenuItem, quantity?: number, variation?: Variation, addOns?: AddOn[], promoOptions?: Record<string, number>) => void;
   quantity: number;
   onUpdateQuantity: (id: string, quantity: number) => void;
 }
@@ -21,11 +22,13 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
   );
   const [selectedAddOns, setSelectedAddOns] = useState<(AddOn & { quantity: number })[]>([]);
   const [modalQuantity, setModalQuantity] = useState(1);
+  const [promoSelection, setPromoSelection] = useState<Record<string, number>>({});
 
   // Reset quantity when modal opens
   React.useEffect(() => {
     if (showCustomization) {
       setModalQuantity(1);
+      setPromoSelection({});
     }
   }, [showCustomization]);
 
@@ -42,7 +45,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
   };
 
   const handleAddToCart = () => {
-    if (item.variations?.length || item.addOns?.length) {
+    if (item.promotion || item.variations?.length || item.addOns?.length) {
       setShowCustomization(true);
     } else {
       onAddToCart(item, 1);
@@ -54,6 +57,26 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
     const addOnsForCart: AddOn[] = selectedAddOns.flatMap(addOn =>
       Array(addOn.quantity).fill({ ...addOn, quantity: undefined })
     );
+
+    if (item.promotion) {
+      const currentCount = Object.values(promoSelection).reduce((a, b) => a + b, 0);
+      if (!item.promotion.allowFewer && currentCount !== item.promotion.quantityRequired) {
+        alert(`Please select exactly ${item.promotion.quantityRequired} items for this bundle.`);
+        return;
+      }
+      if (currentCount === 0) {
+        alert('Please select items to add to your bundle.');
+        return;
+      }
+
+      onAddToCart(item, modalQuantity, selectedVariation, addOnsForCart, promoSelection);
+      setShowCustomization(false);
+      setPromoSelection({});
+      setSelectedAddOns([]);
+      setModalQuantity(1);
+      return;
+    }
+
     onAddToCart(item, modalQuantity, selectedVariation, addOnsForCart);
     setShowCustomization(false);
     setSelectedAddOns([]);
@@ -142,6 +165,13 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
             </div>
           )}
 
+          {/* Promotion Badge */}
+          {item.promotion && (
+            <div className="absolute top-3 right-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10">
+              BUNDLE DEAL
+            </div>
+          )}
+
           {/* Discount Percentage Badge */}
           {item.isOnDiscount && item.discountPrice && (
             <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm text-red-600 text-xs font-bold px-2 py-1 rounded-full shadow-lg">
@@ -172,19 +202,19 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
                     <span className="text-2xl font-bold text-red-600">
-                      ₱{item.discountPrice.toFixed(2)}
+                      ₱{formatPrice(item.discountPrice)}
                     </span>
                     <span className="text-sm text-gray-500 line-through">
-                      ₱{item.basePrice.toFixed(2)}
+                      ₱{formatPrice(item.basePrice)}
                     </span>
                   </div>
                   <div className="text-xs text-gray-500">
-                    Save ₱{(item.basePrice - item.discountPrice).toFixed(2)}
+                    Save ₱{formatPrice(item.basePrice - item.discountPrice)}
                   </div>
                 </div>
               ) : (
                 <div className="text-2xl font-bold text-gray-900">
-                  ₱{item.basePrice.toFixed(2)}
+                  ₱{formatPrice(item.basePrice)}
                 </div>
               )}
 
@@ -209,7 +239,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
                   onClick={handleAddToCart}
                   className="bg-hava-yellow text-black px-6 py-2.5 rounded-xl hover:bg-yellow-400 transition-all duration-200 transform hover:scale-105 font-medium text-sm shadow-lg hover:shadow-xl"
                 >
-                  {item.variations?.length || item.addOns?.length ? 'BUY NOW' : 'Add to Cart'}
+                  {item.promotion ? 'Buy Bundle' : (item.variations?.length || item.addOns?.length ? 'BUY NOW' : 'Add to Cart')}
                 </button>
               ) : (
                 <div className="flex items-center space-x-2 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-xl p-1 border border-yellow-200">
@@ -259,6 +289,60 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
             </div>
 
             <div className="p-6">
+              {/* Promotion / Bundle Builder */}
+              {item.promotion && (
+                <div className="mb-6 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-semibold text-gray-900">Choose Your Bundle</h4>
+                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${Object.values(promoSelection).reduce((a, b) => a + b, 0) === item.promotion.quantityRequired
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-yellow-100 text-yellow-700'
+                      }`}>
+                      {Object.values(promoSelection).reduce((a, b) => a + b, 0)}/{item.promotion.quantityRequired} Selected
+                    </span>
+                  </div>
+
+                  <div className="space-y-3">
+                    {item.promotion.options.map((option) => {
+                      const currentQty = promoSelection[option.id] || 0;
+                      const totalSelected = Object.values(promoSelection).reduce((a, b) => a + b, 0);
+                      const isMaxReached = totalSelected >= (item.promotion?.quantityRequired || 0);
+
+                      return (
+                        <div key={option.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 shadow-sm">
+                          <span className="text-sm font-medium text-gray-700">{option.name}</span>
+                          <div className="flex items-center space-x-3">
+                            <button
+                              onClick={() => {
+                                if (currentQty > 0) {
+                                  setPromoSelection({ ...promoSelection, [option.id]: currentQty - 1 });
+                                }
+                              }}
+                              disabled={currentQty === 0}
+                              className={`p-1 rounded-lg transition-colors ${currentQty === 0 ? 'text-gray-300' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                              <Minus className="h-4 w-4" />
+                            </button>
+                            <span className="w-6 text-center font-semibold text-gray-900">{currentQty}</span>
+                            <button
+                              onClick={() => {
+                                if (!isMaxReached) {
+                                  setPromoSelection({ ...promoSelection, [option.id]: currentQty + 1 });
+                                }
+                              }}
+                              disabled={isMaxReached}
+                              className={`p-1 rounded-lg transition-colors ${isMaxReached ? 'text-gray-300' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                              <Plus className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Size Variations */}
               {item.variations && item.variations.length > 0 && (
                 <div className="mb-6">
@@ -283,7 +367,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
                           <span className="font-medium text-gray-900">{variation.name}</span>
                         </div>
                         <span className="text-gray-900 font-semibold">
-                          ₱{((item.effectivePrice || item.basePrice) + variation.price).toFixed(2)}
+                          ₱{formatPrice((item.effectivePrice || item.basePrice) + variation.price)}
                         </span>
                       </label>
                     ))}
@@ -309,7 +393,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
                             <div className="flex-1">
                               <span className="font-medium text-gray-900">{addOn.name}</span>
                               <div className="text-sm text-gray-600">
-                                {addOn.price > 0 ? `₱${addOn.price.toFixed(2)} each` : 'Free'}
+                                {addOn.price > 0 ? `₱${formatPrice(addOn.price)} each` : 'Free'}
                               </div>
                             </div>
 
@@ -383,7 +467,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
                 </div>
                 <div className="flex items-center justify-between text-2xl font-bold text-gray-900">
                   <span>Total:</span>
-                  <span className="text-red-600">₱{(calculatePrice() * modalQuantity).toFixed(2)}</span>
+                  <span className="text-red-600">₱{formatPrice(calculatePrice() * modalQuantity)}</span>
                 </div>
               </div>
 
@@ -392,7 +476,12 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
                 className="w-full bg-hava-yellow text-black py-4 rounded-xl hover:bg-yellow-400 transition-all duration-200 font-semibold flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 <ShoppingCart className="h-5 w-5" />
-                <span>Add to Cart - ₱{(calculatePrice() * modalQuantity).toFixed(2)}</span>
+                <span>
+                  {item.promotion
+                    ? `Add Bundle - ₱${formatPrice(calculatePrice() * modalQuantity)}`
+                    : `Add to Cart - ₱${formatPrice(calculatePrice() * modalQuantity)}`
+                  }
+                </span>
               </button>
             </div>
           </div>

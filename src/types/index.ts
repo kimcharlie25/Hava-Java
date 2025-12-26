@@ -12,6 +12,18 @@ export interface AddOn {
   quantity?: number;
 }
 
+export interface PromotionOption {
+  id: string;
+  name: string;
+}
+
+export interface PromotionConfig {
+  type: 'bundle';
+  quantityRequired: number;
+  allowFewer: boolean;
+  options: PromotionOption[];
+}
+
 export interface MenuItem {
   id: string;
   name: string;
@@ -24,6 +36,7 @@ export interface MenuItem {
   sortOrder?: number;
   variations?: Variation[];
   addOns?: AddOn[];
+  promotion?: PromotionConfig;
   // Discount pricing fields
   discountPrice?: number;
   discountStartDate?: string;
@@ -38,6 +51,7 @@ export interface CartItem extends MenuItem {
   quantity: number;
   selectedVariation?: Variation;
   selectedAddOns?: AddOn[];
+  selectedPromoOptions?: { [optionId: string]: number };
   totalPrice: number;
 }
 
