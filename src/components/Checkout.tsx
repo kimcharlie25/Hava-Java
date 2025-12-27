@@ -31,6 +31,23 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, totalPrice, onBack }) =>
     'Parañaque'
   ];
 
+  const timeSlots = React.useMemo(() => {
+    const slots = [];
+    const startTime = 9 * 60; // 9:00 AM in minutes
+    const endTime = 21 * 60; // 9:00 PM in minutes
+    const interval = 30;
+
+    for (let time = startTime; time <= endTime; time += interval) {
+      const hours = Math.floor(time / 60);
+      const minutes = time % 60;
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const displayHour = hours % 12 || 12;
+      const displayMinute = minutes.toString().padStart(2, '0');
+      slots.push(`${displayHour}:${displayMinute} ${ampm}`);
+    }
+    return slots;
+  }, []);
+
   React.useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
@@ -236,13 +253,19 @@ Kindly SEND this message to confirm your order. Thank you for choosing Hava Java
                 {serviceType === 'delivery' ? 'Delivery Time' : 'Pickup Time'} *
               </label>
               <div className="relative">
-                <input
-                  type="time"
+                <select
                   value={selectedTime}
                   onChange={(e) => setSelectedTime(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hava-yellow focus:border-transparent transition-all duration-200 outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hava-yellow focus:border-transparent transition-all duration-200 outline-none bg-white"
                   required
-                />
+                >
+                  <option value="" disabled>Select a time</option>
+                  {timeSlots.map((time) => (
+                    <option key={time} value={time}>
+                      {time}
+                    </option>
+                  ))}
+                </select>
                 <Clock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 pointer-events-none" />
               </div>
             </div>

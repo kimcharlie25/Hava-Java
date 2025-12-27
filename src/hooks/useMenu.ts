@@ -111,7 +111,6 @@ export const useMenu = () => {
           discount_price: item.discountPrice || null,
           discount_start_date: item.discountStartDate || null,
           discount_end_date: item.discountEndDate || null,
-          discount_end_date: item.discountEndDate || null,
           discount_active: item.discountActive || false,
           promotion: item.promotion || null
         })
@@ -174,7 +173,6 @@ export const useMenu = () => {
           image_url: updates.image || null,
           discount_price: updates.discountPrice || null,
           discount_start_date: updates.discountStartDate || null,
-          discount_end_date: updates.discountEndDate || null,
           discount_end_date: updates.discountEndDate || null,
           discount_active: updates.discountActive,
           promotion: updates.promotion
