@@ -266,7 +266,7 @@ Kindly SEND this message to confirm your order. Thank you for choosing Hava Java
                     </option>
                   ))}
                 </select>
-                <Clock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 pointer-events-none" />
+                {/*<Clock className="absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 pointer-events-none" />*/}
               </div>
             </div>
 
