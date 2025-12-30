@@ -12,7 +12,7 @@ const Hero: React.FC = () => {
           Handcrafted broths, springy noodles, Korean street-food favorites.
         </p>
         <div className="flex justify-center">
-          <a 
+          <a
             href="#ramen"
             className="bg-ramen-red text-white px-8 py-3 rounded-full hover:bg-ramen-kimchi transition-all duration-300 transform hover:scale-105 font-medium"
           >
